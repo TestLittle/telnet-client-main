@@ -41,6 +41,12 @@ public class TelnetClient {
             }
         } catch (IOException e) {
             System.out.println();
+        }finally{
+            try {
+                socket.close();
+            } catch (IOException e) {
+                System.out.println();
+            }
         }
     }
 
