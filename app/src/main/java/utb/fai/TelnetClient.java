@@ -7,20 +7,58 @@ public class TelnetClient {
 
     private String serverIp;
     private int port;
+    private Socket socket;
 
     public TelnetClient(String serverIp, int port) {
         this.serverIp = serverIp;
         this.port = port;
     }
 
+    public void readFromServer(){
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            String line;
+            while((line = reader.readLine()) != null){
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            System.out.println();
+        }
+    }
+
+    public void sendToServer(){
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+
+            String line;
+            while((line = reader.readLine()) != null){
+                writer.println(line);
+                if(line.equals("/QUIT")){
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println();
+        }
+    }
+
     public void run() {
         try {
-            Socket socket = new Socket(serverIp, port);
-            // Implementation of receiving and sending data
+            socket = new Socket(serverIp, port);
 
-            // Implement processing of input from the user and sending data to the server
+            Thread readerThread = new Thread(() -> readFromServer());
+            Thread writerThread = new Thread(() -> sendToServer());
+            
+            readerThread.start();
+            writerThread.start();
 
-            // Implement response processing from the server and output to the console
+            try{
+                writerThread.join();
+            }catch(InterruptedException e){
+                e.printStackTrace();
+            }
             
         } catch (IOException e) {
             e.printStackTrace();
